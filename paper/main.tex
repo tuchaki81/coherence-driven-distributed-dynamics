@@ -1,0 +1,270 @@
+\documentclass[11pt]{article}
+
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{booktabs}
+
+\title{\textbf{A Distributed Coherence-Driven System:\\
+A Unified Action Framework for Decentralized Self-Organizing Networks}}
+
+\author{
+Henry Matuchaki\\
+Independent Researcher\\
+\texttt{henrymatuchaki@gmail.com}
+}
+
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+This paper presents a distributed system driven by a Unified Action function that combines informational coherence, interaction potential, and structural tension to produce stable self-organization in decentralized networks. Unlike approaches based on centralized control, explicit consensus, or global training, the proposed system evolves locally by following the gradient of a unified action function, resulting in convergence, robustness to churn, and scalability with constant per-node cost. We define operational criteria for percolation, demonstrate stability under heterogeneous and adversarial conditions, and introduce a minimal governance model based exclusively on observable metrics. Experimental results show consistent convergence and resilience without reliance on central authority, identity management, or semantic processing.
+\end{abstract}
+
+
+\section{Introduction}
+
+\subsection{Motivation}
+Distributed systems increasingly face limitations related to centralized coordination, explicit consensus protocols, and global optimization mechanisms. These approaches often suffer from scalability constraints, vulnerability to spoofing or capture, and high coordination costs as network size grows.
+
+This work explores an alternative paradigm: a decentralized system that self-organizes through local dynamics driven by measurable physical-like quantities rather than global control or semantic objectives.
+
+\subsection{Contributions}
+The main contributions of this work are:
+\begin{itemize}
+\item A Unified Action function combining coherence, potential, and tension.
+\item A fully local, gradient-driven dynamic rule for nodes.
+\item An operational definition of percolation in distributed networks.
+\item A decentralized security and governance mechanism based on coherence.
+\item Experimental validation under scale, churn, and latency.
+\end{itemize}
+
+\section{Related Work}
+
+This work relates to several research areas:
+\begin{itemize}
+\item Consensus protocols (Raft, PBFT, Nakamoto consensus)
+\item Swarm intelligence and multi-agent systems
+\item Peer-to-peer network architectures
+\item Reputation-based distributed systems
+\item Dynamical systems and self-organizing fields
+\end{itemize}
+
+Unlike consensus-based systems, the proposed approach does not require global agreement, leader election, or explicit coordination. Instead, collective behavior emerges from local optimization of a unified metric.
+
+\section{Theoretical Model}
+
+\subsection{Informational Coherence (ICOER)}
+
+Each node maintains an internal state vector (spin) \( \mathbf{s}_i \in \mathbb{R}^n \), normalized such that:
+\[
+\|\mathbf{s}_i\| = 1
+\]
+
+Informational coherence is defined as:
+\[
+I = \frac{1}{N} \sum_{i=1}^{N} \left(1 - d(\mathbf{s}_i, \bar{\mathbf{s}})\right)^D
+\]
+where \( d(\cdot,\cdot) \) is a normalized distance and \( \bar{\mathbf{s}} \) is the mean reference state.
+
+\subsection{Interaction Potential}
+
+The interaction potential between nodes \( i \) and \( j \) is defined as:
+\[
+V_{ij} = - \rho_i \rho_j \left(1 + \left(\frac{r_{ij}}{R_c}\right)^2\right)^{-D}
+\]
+where \( \rho \) is the informational density, \( r_{ij} \) the distance between nodes, and \( R_c \) a correlation radius.
+
+The total potential is:
+\[
+V = \sum_{i \neq j} V_{ij}
+\]
+
+\subsection{Structural Tension}
+
+Structural tension quantifies deformation in the interaction substrate:
+\[
+T = \sum_{i \neq j} \log\left(1 + \kappa \left(\frac{r_{ij}}{r_{ij} + R_0}\right)^D\right)
+\]
+
+All quantities are normalized to ensure bounded dynamics.
+
+\subsection{Unified Action}
+
+The Unified Action function is defined as:
+\[
+U = \alpha \cdot \frac{I_{IA} + I_{cos}}{2}
++ \beta \cdot \tilde{V}
+- \gamma \cdot \tilde{T}
+\]
+
+This scalar function governs all system dynamics.
+
+\section{System Dynamics}
+
+\subsection{Gradient-Based Evolution}
+
+Each node updates its state by following the gradient of the Unified Action:
+\[
+\mathbf{x}_{i}^{t+1} = \mathbf{x}_{i}^{t} + \eta_{x} \nabla_{\mathbf{x}} U + \xi_x
+\]
+\[
+\mathbf{s}_{i}^{t+1} = \mathbf{s}_{i}^{t} + \eta_{s} \nabla_{\mathbf{s}} U + \xi_s
+\]
+
+where \( \xi \) represents controlled stochastic noise.
+
+\subsection{Stability Properties}
+
+Empirically, the system exhibits:
+\begin{itemize}
+\item Monotonic increase of \( U \) on average
+\item Decay of tension over time
+\item Bounded fluctuations under noise
+\end{itemize}
+
+\section{Architecture}
+
+\subsection{Node Model}
+Each node maintains:
+\begin{itemize}
+\item Local state (spin, position, density)
+\item Local metrics (ICOER, potential, tension)
+\item Minimal published summaries
+\end{itemize}
+
+\subsection{Network Layer}
+Nodes communicate over a peer-to-peer network using:
+\begin{itemize}
+\item Decentralized discovery
+\item Constant-size messages
+\item No global clock or coordinator
+\end{itemize}
+
+\subsection{Security}
+Authenticity is ensured via lightweight cryptographic signatures. Influence is weighted by coherence-derived reputation rather than identity.
+
+\section{Percolation}
+
+\subsection{Operational Definition}
+Percolation is detected when, over a window \( W \):
+\[
+\mathrm{Var}(U) < \varepsilon_U,\quad
+\mathrm{Var}(I) < \varepsilon_I,\quad
+\left|\frac{dU}{dt}\right| < \delta,\quad
+\bar{T} < \tau
+\]
+
+\subsection{Interpretation}
+This transition marks the emergence of collective stability, where local disturbances no longer propagate globally.
+
+\section{Experiments}
+
+\subsection{Setup}
+Experiments were conducted with:
+\begin{itemize}
+\item Network sizes from 20 to 200 nodes
+\item Churn rates up to 50\%
+\item LAN and WAN latency conditions
+\item Heterogeneous initial states
+\end{itemize}
+
+\subsection{Results}
+Observed outcomes include:
+\begin{itemize}
+\item Consistent convergence of \( U \) and ICOER
+\item Rapid reabsorption after churn
+\item Stable operation under latency
+\item Constant per-node communication cost
+\end{itemize}
+
+Control experiments without gradient dynamics failed to maintain stability.
+
+\section{Governance by Coherence}
+
+Governance emerges from local rules:
+\begin{itemize}
+\item Influence weighted by coherence reputation
+\item Automatic decoupling of incoherent nodes
+\item Adaptive local parameters
+\end{itemize}
+
+No centralized authority or explicit voting is required.
+
+\section{Limitations}
+
+The system:
+\begin{itemize}
+\item Does not process semantic content
+\item Does not define external objectives
+\item Requires parameter calibration
+\item Is not a decision-making framework
+\end{itemize}
+
+\section{Conclusion}
+
+We demonstrated that decentralized networks can achieve stable collective behavior using purely local, metric-driven dynamics governed by a unified action function. The proposed framework eliminates the need for central coordination, explicit consensus, or identity-based control, offering a scalable and resilient alternative for distributed systems.
+
+\section*{Availability}
+
+\section{Availability}
+The source code and experimental scripts are publicly available at:
+\url{https://github.com/tuchaki81/coherence-driven-distributed-dynamics}
+
+A permanent archived version is available via Zenodo:
+\url{https://doi.org/10.5281/zenodo.XXXXXXX}
+
+
+
+\begin{thebibliography}{9}
+
+\bibitem{vicsek}
+T. Vicsek and A. Zafeiris,
+\textit{Collective motion},
+Physics Reports, 517(3–4), 71–140 (2012).
+
+\bibitem{p2p}
+M. Castro et al.,
+\textit{Practical Byzantine Fault Tolerance},
+OSDI (1999).
+
+\bibitem{complex}
+S. H. Strogatz,
+\textit{Nonlinear Dynamics and Chaos},
+Westview Press (2014).
+
+\end{thebibliography}
+
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.95\linewidth]{fig1_timeseries_baseline.png}
+  \caption{Baseline evolution of the Unified Action $U(t)$, global coherence $ICOER_{\mathrm{global}}(t)$, and normalized tension $\tilde{T}(t)$ in a synthetic simulation using the proposed local dynamics.}
+  \label{fig:baseline_timeseries}
+\end{figure}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.95\linewidth]{fig2_percolation_criteria.png}
+  \caption{Operational percolation criteria computed over a sliding window (synthetic simulation). Dashed lines indicate example thresholds used to flag convergence and stability.}
+  \label{fig:percolation_criteria}
+\end{figure}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.85\linewidth]{fig3_local_coherence_hist.png}
+  \caption{Histogram of per-node local coherence contributions at steady state (synthetic simulation).}
+  \label{fig:local_coherence_hist}
+\end{figure}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.95\linewidth]{fig4_churn_timeseries.png}
+  \caption{Unified Action and global coherence under churn events (synthetic simulation). The network undergoes periodic node removal and insertion while maintaining bounded dynamics.}
+  \label{fig:churn_timeseries}
+\end{figure}
+
+\end{document}
