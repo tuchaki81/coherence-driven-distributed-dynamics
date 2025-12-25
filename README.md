@@ -2,7 +2,7 @@
 
 This repository accompanies the paper:
 
-**“A Unified Action Framework for Coherence-Driven Distributed Systems”**  
+ "A Distributed Coherence-Driven System: A Unified Action Framework for Decentralized Self-Organizing Networks"  
 Henry Matuchaki, 2025.
 
 ## Overview
