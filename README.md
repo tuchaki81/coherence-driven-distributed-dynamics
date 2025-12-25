@@ -26,3 +26,9 @@ To reproduce the figures:
 pip install -r requirements.txt
 python experiments/run_baseline.py
 python experiments/run_churn.py
+
+## License
+MIT License. See LICENSE.
+
+## Citation
+See CITATION.cff.
