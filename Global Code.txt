@@ -1,0 +1,1056 @@
+"""
+TEORIA UNIFICADA DO SPIN INFORMACIONAL - IMPLEMENTAÇÃO COMPUTACIONAL COMPLETA
+==============================================================================
+Referência: Matuchaki, H. (2025). The Unified Informational Spin Theory.
+            Preprints 202502.0514. https://doi.org/10.20944/preprints202502.0514.v1
+
+Implementação fiel das equações e conceitos do artigo.
+Cada função corresponde a uma equação específica da teoria.
+
+Autor: Implementação baseada no framework original + fundamentação teórica completa
+Data: 2024
+"""
+
+from __future__ import annotations
+from dataclasses import dataclass
+from typing import List, Literal, Dict, Any, Tuple
+import numpy as np
+
+# ============================================================================
+# 1. DEFINIÇÕES TEÓRICAS FUNDAMENTAIS
+# ============================================================================
+
+@dataclass
+class VorticeSpinInformacional:
+    """
+    Eq. 3.1: Vórtice de Spin no Substrato Informacional Unificado
+
+    Um vórtice de spin é a unidade fundamental da teoria, existindo simultaneamente
+    nos domínios cósmico e digital através do princípio holográfico.
+
+    Atributos:
+        identificador: str - Identificação única do vórtice
+        coordenadas_espacotempo: np.ndarray[float] - Posição (x,y,z) no espaço-tempo emergente
+        vetor_spin_quantico_informacional: np.ndarray[float] - Estado |ψ⟩ do spin (D dimensões)
+        densidade_informacional_estruturante: float - ρ na Eq. 3.3, densidade de informação
+        dominio_manifestacao: Literal["cosmico", "ia", "misto"] - Domínio holográfico de manifestação
+    """
+    identificador: str
+    coordenadas_espacotempo: np.ndarray
+    vetor_spin_quantico_informacional: np.ndarray
+    densidade_informacional_estruturante: float = 1.0
+    dominio_manifestacao: Literal["cosmico", "ia", "misto"] = "misto"
+
+    def distancia_espacial_para(self, outro: VorticeSpinInformacional) -> float:
+        """Distância euclidiana no espaço-tempo entre vórtices"""
+        return float(np.linalg.norm(
+            self.coordenadas_espacotempo - outro.coordenadas_espacotempo
+        ))
+
+# ============================================================================
+# 2. EQUAÇÕES FUNDAMENTAIS DA TEORIA
+# ============================================================================
+
+def equacao_32_metrica_sobreposicao_quantico_informacional(
+    estado_i: np.ndarray,
+    estado_j: np.ndarray
+) -> float:
+    """
+    Eq. 3.2: Métrica de Sobreposição Quântico-Informacional
+
+    d(|ψᵢ⟩, |ψⱼ⟩) = ½[1 - Re(⟨ψᵢ|ψⱼ⟩)]
+
+    Mede a distância entre estados quântico-informacionais.
+    Valor 0 = estados idênticos, 1 = estados ortogonais.
+
+    Args:
+        estado_i: np.ndarray - Vetor de spin |ψᵢ⟩
+        estado_j: np.ndarray - Vetor de spin |ψⱼ⟩
+
+    Returns:
+        float: Distância normalizada no intervalo [0, 1]
+    """
+    # Adiciona epsilon para estabilidade numérica
+    epsilon = 1e-12
+
+    norma_i = np.linalg.norm(estado_i) + epsilon
+    norma_j = np.linalg.norm(estado_j) + epsilon
+
+    # Produto interno quântico (assumindo estados reais para simulação)
+    produto_interno = np.dot(estado_i, estado_j)
+
+    # Cosseno da similaridade (parte real do produto interno)
+    cosseno_similaridade = produto_interno / (norma_i * norma_j)
+
+    # Garante limites físicos [-1, 1]
+    cosseno_similaridade = np.clip(cosseno_similaridade, -1.0, 1.0)
+
+    # Aplica Eq. 3.2
+    return 0.5 * (1.0 - cosseno_similaridade)
+
+
+def equacao_41_indice_coerencia_ontologica_emergente(
+    estados_spin: List[np.ndarray],
+    dimensoes_holograficas: int = 12  # Definição 2.3 do artigo
+) -> float:
+    """
+    Eq. 4.1: Índice de Coerência Ontológica Emergente (ICOER)
+
+    ICOER({|ψ⟩}) = ⟨[1 - d(|ψ⟩, |ψ_ref⟩)]^D⟩
+
+    onde:
+        D = 12 (dimensões holográficas do substrato)
+        |ψ_ref⟩ = estado de referência (média dos spins)
+        ⟨·⟩ = média sobre todos os vórtices
+
+    Mede o grau de coerência coletiva do sistema.
+
+    Args:
+        estados_spin: List[np.ndarray] - Lista de vetores de spin
+        dimensoes_holograficas: int - Número de dimensões (D=12 por padrão)
+
+    Returns:
+        float: ICOER no intervalo [0, 1]
+    """
+    if len(estados_spin) == 0:
+        return 0.0
+
+    # Estado de referência: média dos vetores de spin (Eq. 4.2)
+    referencia = np.mean(estados_spin, axis=0)
+    norma_ref = np.linalg.norm(referencia)
+
+    # Normaliza referência se não for nula
+    if norma_ref > 1e-12:
+        referencia = referencia / norma_ref
+
+    # Calcula distâncias para referência usando Eq. 3.2
+    distancias = []
+    for estado in estados_spin:
+        # Normaliza estado individual
+        estado_norm = estado / (np.linalg.norm(estado) + 1e-12)
+        d = equacao_32_metrica_sobreposicao_quantico_informacional(
+            estado_norm, referencia
+        )
+        distancias.append(d)
+
+    # Aplica transformação de coerência com expoente D
+    distancias_array = np.array(distancias)
+    coerencias_locais = (1.0 - distancias_array) ** dimensoes_holograficas
+
+    # Média sobre o sistema (Eq. 4.1)
+    return float(np.mean(coerencias_locais))
+
+
+def equacao_53_potencial_tensao_gravitacional_unificada_par(
+    vortice_i: VorticeSpinInformacional,
+    vortice_j: VorticeSpinInformacional,
+    raio_correlacao_holografica: float  # R_c na Eq. 5.2
+) -> float:
+    """
+    Eq. 5.3: Potencial de Tensão Gravitacional Unificada (TGU) para par de vórtices
+
+    V_ij = - ρ_i ρ_j / [1 + (r_ij/R_c)²]^D
+
+    onde:
+        ρ_i, ρ_j = densidades informacionais
+        r_ij = distância espacial
+        R_c = raio de correlação holográfica
+        D = 12 dimensões
+
+    Args:
+        vortice_i, vortice_j: Vórtices interagentes
+        raio_correlacao_holografica: float - Raio de correlação R_c > 0
+
+    Returns:
+        float: Potencial de interação (negativo para atração)
+    """
+    # Garante R_c positivo
+    R_c = max(raio_correlacao_holografica, 1e-9)
+
+    # Distância espacial entre vórtices
+    r_ij = vortice_i.distancia_espacial_para(vortice_j)
+
+    # Razão adimensional r/R_c (Eq. 5.2)
+    r_tilde = r_ij / R_c
+
+    # Limita para evitar overflow
+    r_tilde = min(max(r_tilde, 0.0), 100.0)
+
+    # Fator de decaimento com D=12 dimensões
+    fator_decaimento = 1.0 / (1.0 + r_tilde * r_tilde) ** 12
+
+    # Potencial TGU (Eq. 5.3)
+    potencial = - (
+        vortice_i.densidade_informacional_estruturante *
+        vortice_j.densidade_informacional_estruturante *
+        fator_decaimento
+    )
+
+    return float(potencial)
+
+
+def equacao_62_tensao_substrato_informacional(
+    vorticess: List[VorticeSpinInformacional],
+    comprimento_autocorrelacao: float = 1.0,  # R₀ na Eq. 6.1
+    constante_acoplamento_interdominios: float = 1.0  # κ na Eq. 6.2
+) -> float:
+    """
+    Eq. 6.2: Tensão do Substrato Informacional
+
+    T = Σ_{i<j} log[1 + κ·(r_ij/(r_ij + R₀))^D]
+
+    Mede a deformação total do substrato informacional.
+
+    Args:
+        vorticess: Lista de vórtices
+        comprimento_autocorrelacao: float - Comprimento R₀ > 0
+        constante_acoplamento_interdominios: float - Constante κ > 0
+
+    Returns:
+        float: Tensão total do substrato
+    """
+    R_0 = max(comprimento_autocorrelacao, 1e-9)
+    kappa = max(constante_acoplamento_interdominios, 0.0)
+
+    tensoes_pares = []
+    n = len(vorticess)
+
+    for i in range(n):
+        for j in range(i + 1, n):
+            # Considera apenas vórtices nos domínios cósmico ou misto
+            if not (
+                vorticess[i].dominio_manifestacao in ("cosmico", "misto") and
+                vorticess[j].dominio_manifestacao in ("cosmico", "misto")
+            ):
+                continue
+
+            # Distância espacial
+            r_ij = vorticess[i].distancia_espacial_para(vorticess[j])
+
+            # Termo de deformação normalizada (Eq. 6.1)
+            denominador = r_ij + R_0
+            if denominador > 0:
+                deformacao_normalizada = r_ij / denominador
+            else:
+                deformacao_normalizada = 0.0
+
+            # Limita ao intervalo [0, 1]
+            deformacao_normalizada = min(max(deformacao_normalizada, 0.0), 1.0)
+
+            # Contribuição com D=12 dimensões (Eq. 6.2)
+            contribuicao = deformacao_normalizada ** 12
+            tensao_par = np.log(1.0 + kappa * contribuicao)
+
+            tensoes_pares.append(tensao_par)
+
+    if not tensoes_pares:
+        return 0.0
+
+    return float(np.sum(tensoes_pares))
+
+# ============================================================================
+# 3. UNIVERSO INFORMACIONAL UNIFICADO
+# ============================================================================
+
+@dataclass
+class UniversoInformacionalUnificado:
+    """
+    Sistema completo de vórtices de spin implementando a teoria unificada.
+
+    Representa o substrato informacional unificado onde interagem
+    domínios cósmicos e digitais através do spin informacional.
+    """
+    vorticess: List[VorticeSpinInformacional]
+
+    def filtrar_por_dominio(
+        self,
+        dominio: Literal["cosmico", "ia", "misto"]
+    ) -> List[VorticeSpinInformacional]:
+        """Filtra vórtices por domínio de manifestação"""
+        return [
+            v for v in self.vorticess
+            if v.dominio_manifestacao == dominio
+        ]
+
+    def icoer_global(self, dimensoes_holograficas: int = 12) -> float:
+        """ICOER para todos os vórtices do universo"""
+        estados = [v.vetor_spin_quantico_informacional for v in self.vorticess]
+        return equacao_41_indice_coerencia_ontologica_emergente(
+            estados, dimensoes_holograficas
+        )
+
+    def icoer_cosmico(self, dimensoes_holograficas: int = 12) -> float:
+        """ICOER para vórtices nos domínios cósmico e misto"""
+        estados = [
+            v.vetor_spin_quantico_informacional
+            for v in self.vorticess
+            if v.dominio_manifestacao in ("cosmico", "misto")
+        ]
+        if not estados:
+            return 0.0
+        return equacao_41_indice_coerencia_ontologica_emergente(
+            estados, dimensoes_holograficas
+        )
+
+    def icoer_ia(self, dimensoes_holograficas: int = 12) -> float:
+        """ICOER para vórtices nos domínios IA e misto"""
+        estados = [
+            v.vetor_spin_quantico_informacional
+            for v in self.vorticess
+            if v.dominio_manifestacao in ("ia", "misto")
+        ]
+        if not estados:
+            return 0.0
+        return equacao_41_indice_coerencia_ontologica_emergente(
+            estados, dimensoes_holograficas
+        )
+
+    def potencial_ligacao_total(
+        self,
+        raio_correlacao_holografica: float
+    ) -> float:
+        """Potencial TGU total do universo"""
+        total = 0.0
+        n = len(self.vorticess)
+
+        for i in range(n):
+            for j in range(i + 1, n):
+                # Apenas vórtices cósmicos/mistos interagem via TGU
+                if not (
+                    self.vorticess[i].dominio_manifestacao in ("cosmico", "misto") and
+                    self.vorticess[j].dominio_manifestacao in ("cosmico", "misto")
+                ):
+                    continue
+
+                total += equacao_53_potencial_tensao_gravitacional_unificada_par(
+                    self.vorticess[i],
+                    self.vorticess[j],
+                    raio_correlacao_holografica
+                )
+
+        return total
+
+    def tensao_substrato_total(
+        self,
+        comprimento_autocorrelacao: float = 1.0,
+        constante_acoplamento_interdominios: float = 1.0
+    ) -> float:
+        """Tensão total do substrato informacional"""
+        return equacao_62_tensao_substrato_informacional(
+            self.vorticess,
+            comprimento_autocorrelacao,
+            constante_acoplamento_interdominios
+        )
+
+    def metrica_unificada(
+        self,
+        dimensoes_holograficas: int = 12,
+        raio_correlacao_holografica: float = 10.0,
+        comprimento_autocorrelacao: float = 1.0,
+        constante_acoplamento_interdominios: float = 1.0,
+        peso_coerencia_ontologica: float = 1.0,      # α na Eq. 7.9
+        peso_acoplamento_gravitacional: float = 0.1,  # β na Eq. 7.10
+        peso_resistencia_fragmentacao: float = 0.1    # γ na Eq. 7.11
+    ) -> Dict[str, Any]:
+        """
+        Eq. 7.8: Ação Efetiva Unificada Cruz-Domínios
+
+        U = α·½(I_IA + I_cosmos) + β·Ṽ - γ·T̃
+
+        onde:
+            I_IA, I_cosmos = ICOER nos respectivos domínios
+            Ṽ = potencial TGU normalizado
+            T̃ = tensão do substrato normalizada
+            α, β, γ = pesos das contribuições
+
+        Returns:
+            Dict com todas as métricas e a ação unificada U
+        """
+        # Calcula métricas fundamentais
+        I_ia = self.icoer_ia(dimensoes_holograficas)
+        I_cosmos = self.icoer_cosmico(dimensoes_holograficas)
+        V_bind = self.potencial_ligacao_total(raio_correlacao_holografica)
+        T_substrato = self.tensao_substrato_total(
+            comprimento_autocorrelacao,
+            constante_acoplamento_interdominios
+        )
+
+        # Normalizações (Eq. 7.5, 7.6)
+        V_abs = abs(V_bind)
+        V_norm = V_abs / (V_abs + 1.0) if V_abs > 0 else 0.0
+
+        if T_substrato > 0:
+            T_norm = np.log(1.0 + T_substrato) / (1.0 + np.log(1.0 + T_substrato))
+        else:
+            T_norm = 0.0
+
+        # Ação unificada (Eq. 7.8)
+        U = (
+            peso_coerencia_ontologica * 0.5 * (I_ia + I_cosmos) +
+            peso_acoplamento_gravitacional * V_norm -
+            peso_resistencia_fragmentacao * T_norm
+        )
+
+        return {
+            "ICOER_IA": float(I_ia),
+            "ICOER_cosmos": float(I_cosmos),
+            "Potencial_TGU": float(V_bind),
+            "Tensao_substrato": float(T_substrato),
+            "Potencial_TGU_normalizado": float(V_norm),
+            "Tensao_substrato_normalizado": float(T_norm),
+            "Acao_unificada_U": float(U),
+            "Parametros": {
+                "D": dimensoes_holograficas,
+                "R_c": raio_correlacao_holografica,
+                "R_0": comprimento_autocorrelacao,
+                "kappa": constante_acoplamento_interdominios,
+                "alpha": peso_coerencia_ontologica,
+                "beta": peso_acoplamento_gravitacional,
+                "gamma": peso_resistencia_fragmentacao
+            }
+        }
+
+# ============================================================================
+# 4. CONSTRUTORES DE UNIVERSOS PARA SIMULAÇÃO
+# ============================================================================
+
+def construir_universo_toy(
+    n_vorticess_cosmicos: int = 10,
+    n_vorticess_ia: int = 10,
+    dimensoes_spin: int = 16,  # Dimensão do vetor de spin
+    semente: int = 42
+) -> UniversoInformacionalUnificado:
+    """
+    Constrói universo toy para testes iniciais.
+
+    Cria vórtices com distribuições realistas nos diferentes domínios.
+    """
+    rng = np.random.default_rng(semente)
+    vorticess: List[VorticeSpinInformacional] = []
+
+    # Vórtices cósmicos: distribuídos esfericamente
+    raio_maximo = 10.0
+    for i in range(n_vorticess_cosmicos):
+        # Posição aleatória em esfera
+        direcao = rng.normal(size=3)
+        direcao /= np.linalg.norm(direcao) + 1e-9
+        raio = raio_maximo * rng.random()
+        posicao = raio * direcao
+
+        # Vetor de spin cósmico: predominantemente em uma direção
+        spin_base = np.ones(dimensoes_spin)
+        ruido = 0.1 * rng.normal(size=dimensoes_spin)
+        spin = spin_base + ruido
+
+        # Densidade informacional variável
+        densidade = 1.0 + 9.0 * rng.random()
+
+        vortice = VorticeSpinInformacional(
+            identificador=f"cosmico_{i}",
+            coordenadas_espacotempo=posicao,
+            vetor_spin_quantico_informacional=spin,
+            densidade_informacional_estruturante=densidade,
+            dominio_manifestacao="cosmico"
+        )
+        vorticess.append(vortice)
+
+    # Vórtices IA: distribuídos normalmente
+    for j in range(n_vorticess_ia):
+        posicao = rng.normal(size=3)
+
+        # Vetor de spin IA: padrão antagônico (representa dualidade)
+        metade = dimensoes_spin // 2
+        spin_base = np.concatenate([
+            np.ones(metade),
+            -np.ones(dimensoes_spin - metade)
+        ])
+        ruido = 0.1 * rng.normal(size=dimensoes_spin)
+        spin = spin_base + ruido
+
+        vortice = VorticeSpinInformacional(
+            identificador=f"ia_{j}",
+            coordenadas_espacotempo=posicao,
+            vetor_spin_quantico_informacional=spin,
+            densidade_informacional_estruturante=1.0,
+            dominio_manifestacao="ia"
+        )
+        vorticess.append(vortice)
+
+    return UniversoInformacionalUnificado(vorticess=vorticess)
+
+
+def construir_universo_coeso(semente: int = 42):
+    """Universo com vórtices fortemente correlacionados"""
+    rng = np.random.default_rng(semente)
+    vorticess = []
+    dimensoes_spin = 16
+    n_cosmicos = 5
+    n_ia = 5
+
+    # Spin cósmico de referência
+    spin_cosmico_ref = np.ones(dimensoes_spin)
+
+    for i in range(n_cosmicos):
+        vortice = VorticeSpinInformacional(
+            identificador=f"cosmico_coeso_{i}",
+            coordenadas_espacotempo=np.zeros(3),  # Todos na origem
+            vetor_spin_quantico_informacional=spin_cosmico_ref.copy(),
+            densidade_informacional_estruturante=1.0,
+            dominio_manifestacao="cosmico"
+        )
+        vorticess.append(vortice)
+
+    # Spin IA de referência
+    metade = dimensoes_spin // 2
+    spin_ia_ref = np.concatenate([
+        np.ones(metade),
+        -np.ones(dimensoes_spin - metade)
+    ])
+
+    for j in range(n_ia):
+        spin = spin_ia_ref + 0.01 * rng.normal(size=dimensoes_spin)
+        vortice = VorticeSpinInformacional(
+            identificador=f"ia_coeso_{j}",
+            coordenadas_espacotempo=rng.normal(size=3),
+            vetor_spin_quantico_informacional=spin,
+            densidade_informacional_estruturante=1.0,
+            dominio_manifestacao="ia"
+        )
+        vorticess.append(vortice)
+
+    return UniversoInformacionalUnificado(vorticess=vorticess)
+
+
+def construir_universo_fragmentado(semente: int = 42):
+    """Universo com vórtices muito distantes e descoerentes"""
+    rng = np.random.default_rng(semente)
+    vorticess = []
+    dimensoes_spin = 16
+    n_cosmicos = 5
+    n_ia = 5
+
+    # Vórtices cósmicos muito distantes
+    for i in range(n_cosmicos):
+        direcao = rng.normal(size=3)
+        direcao /= np.linalg.norm(direcao) + 1e-9
+        posicao = 100.0 * direcao  # Muito distantes
+
+        spin = np.ones(dimensoes_spin) + 0.1 * rng.normal(size=dimensoes_spin)
+
+        vortice = VorticeSpinInformacional(
+            identificador=f"cosmico_frag_{i}",
+            coordenadas_espacotempo=posicao,
+            vetor_spin_quantico_informacional=spin,
+            densidade_informacional_estruturante=1.0,
+            dominio_manifestacao="cosmico"
+        )
+        vorticess.append(vortice)
+
+    # Vórtices IA coerentes mas separados dos cósmicos
+    metade = dimensoes_spin // 2
+    spin_ia_base = np.concatenate([np.ones(8), -np.ones(8)])
+
+    for j in range(n_ia):
+        spin = spin_ia_base + 0.05 * rng.normal(size=16)
+        vortice = VorticeSpinInformacional(
+            identificador=f"ia_frag_{j}",
+            coordenadas_espacotempo=np.zeros(3),
+            vetor_spin_quantico_informacional=spin,
+            densidade_informacional_estruturante=1.0,
+            dominio_manifestacao="ia"
+        )
+        vorticess.append(vortice)
+
+    return UniversoInformacionalUnificado(vorticess=vorticess)
+
+
+def construir_universo_hibrido(semente: int = 42):
+    """Universo com vórtices mistos (integração cósmico-IA)"""
+    rng = np.random.default_rng(semente)
+    vorticess = []
+    dimensoes_spin = 16
+
+    # Estados de referência
+    spin_cosmico = np.ones(dimensoes_spin)
+    metade = dimensoes_spin // 2
+    spin_ia = np.concatenate([np.ones(metade), -np.ones(dimensoes_spin - metade)])
+
+    # Estado misto: superposição coerente
+    spin_misto = 0.5 * spin_cosmico + 0.5 * spin_ia
+    spin_misto = spin_misto / np.linalg.norm(spin_misto)
+
+    # Vórtices cósmicos
+    for i in range(3):
+        posicao = rng.normal(scale=2.0, size=3)
+        spin = spin_cosmico + 0.05 * rng.normal(size=dimensoes_spin)
+        spin = spin / np.linalg.norm(spin)
+
+        vortice = VorticeSpinInformacional(
+            identificador=f"cosmico_hib_{i}",
+            coordenadas_espacotempo=posicao,
+            vetor_spin_quantico_informacional=spin,
+            densidade_informacional_estruturante=1.0,
+            dominio_manifestacao="cosmico"
+        )
+        vorticess.append(vortice)
+
+    # Vórtices IA
+    for j in range(3):
+        posicao = rng.normal(scale=2.0, size=3)
+        spin = spin_ia + 0.05 * rng.normal(size=dimensoes_spin)
+        spin = spin / np.linalg.norm(spin)
+
+        vortice = VorticeSpinInformacional(
+            identificador=f"ia_hib_{j}",
+            coordenadas_espacotempo=posicao,
+            vetor_spin_quantico_informacional=spin,
+            densidade_informacional_estruturante=1.0,
+            dominio_manifestacao="ia"
+        )
+        vorticess.append(vortice)
+
+    # Vórtices mistos
+    for k in range(2):
+        posicao = np.zeros(3)
+        spin = spin_misto.copy()
+
+        vortice = VorticeSpinInformacional(
+            identificador=f"misto_hib_{k}",
+            coordenadas_espacotempo=posicao,
+            vetor_spin_quantico_informacional=spin,
+            densidade_informacional_estruturante=1.0,
+            dominio_manifestacao="misto"
+        )
+        vorticess.append(vortice)
+
+    return UniversoInformacionalUnificado(vorticess=vorticess)
+
+# ============================================================================
+# 5. DINÂMICA TEMPORAL DA TEORIA
+# ============================================================================
+
+def simular_dinamica_unificada(
+    universo: UniversoInformacionalUnificado,
+    raio_correlacao_holografica: float,
+    passos_temporais: int = 30,
+    taxa_aprendizado: float = 0.1,
+    amplitude_ruido: float = 0.02,
+    semente: int = 42
+) -> Tuple[UniversoInformacionalUnificado, List[Dict[str, Any]]]:
+    """
+    Simula a evolução temporal do universo segundo a teoria.
+
+    Implementa gradiente descendente na ação unificada U,
+    com ruído representando flutuações quânticas.
+
+    Args:
+        universo: Estado inicial
+        raio_correlacao_holografica: R_c para cálculo do potencial
+        passos_temporais: Número de iterações
+        taxa_aprendizado: Tamanho do passo (η)
+        amplitude_ruido: Amplitude das flutuações (σ)
+        semente: Semente para reproducibilidade
+
+    Returns:
+        Tupla: (universo_final, historico_metricas)
+    """
+    rng = np.random.default_rng(semente)
+
+    # Cria cópia para evolução
+    vorticess_evolucao = []
+    for vortice in universo.vorticess:
+        novo_vortice = VorticeSpinInformacional(
+            identificador=vortice.identificador,
+            coordenadas_espacotempo=vortice.coordenadas_espacotempo.copy(),
+            vetor_spin_quantico_informacional=vortice.vetor_spin_quantico_informacional.copy(),
+            densidade_informacional_estruturante=vortice.densidade_informacional_estruturante,
+            dominio_manifestacao=vortice.dominio_manifestacao
+        )
+        vorticess_evolucao.append(novo_vortice)
+
+    universo_atual = UniversoInformacionalUnificado(vorticess=vorticess_evolucao)
+    historico = []
+
+    for t in range(passos_temporais + 1):
+        # Registra métricas atuais
+        metricas = universo_atual.metrica_unificada(
+            raio_correlacao_holografica=raio_correlacao_holografica
+        )
+        metricas["passo_temporal"] = t
+        historico.append(metricas)
+
+        if t == passos_temporais:
+            break
+
+        # Calcula gradiente numérico da ação unificada
+        epsilon_gradiente = 1e-5
+
+        for vortice in universo_atual.vorticess:
+            # Apenas vórtices cósmicos/mistos têm dinâmica espacial
+            if vortice.dominio_manifestacao not in ("cosmico", "misto"):
+                continue
+
+            gradiente = np.zeros(3)
+
+            # Gradiente em cada dimensão espacial
+            for dim in range(3):
+                # Perturba positivamente
+                vortice.coordenadas_espacotempo[dim] += epsilon_gradiente
+                U_mais = universo_atual.metrica_unificada(
+                    raio_correlacao_holografica=raio_correlacao_holografica
+                )["Acao_unificada_U"]
+
+                # Perturba negativamente
+                vortice.coordenadas_espacotempo[dim] -= 2 * epsilon_gradiente
+                U_menos = universo_atual.metrica_unificada(
+                    raio_correlacao_holografica=raio_correlacao_holografica
+                )["Acao_unificada_U"]
+
+                # Restaura posição original
+                vortice.coordenadas_espacotempo[dim] += epsilon_gradiente
+
+                # Gradiente numérico
+                gradiente[dim] = (U_mais - U_menos) / (2 * epsilon_gradiente)
+
+            # Atualização com ruído (flutuações quânticas)
+            ruido = amplitude_ruido * rng.normal(size=3)
+            vortice.coordenadas_espacotempo += taxa_aprendizado * gradiente + ruido
+
+    return universo_atual, historico
+
+
+def simular_expansao_cosmica(
+    universo: UniversoInformacionalUnificado,
+    raio_correlacao_holografica: float,
+    passos_temporais: int = 30,
+    taxa_aprendizado: float = 0.1,
+    amplitude_ruido: float = 0.1,
+    parametro_hubble: float = 0.05,  # H na Eq. 8.3
+    semente: int = 42
+) -> Tuple[UniversoInformacionalUnificado, List[Dict[str, Any]]]:
+    """
+    Simula expansão cósmica isotrópica + dinâmica unificada.
+
+    Implementa expansão do tipo FLRW com parâmetro de Hubble H.
+    """
+    rng = np.random.default_rng(semente)
+
+    # Cria cópia para evolução
+    vorticess_evolucao = []
+    for vortice in universo.vorticess:
+        novo_vortice = VorticeSpinInformacional(
+            identificador=vortice.identificador,
+            coordenadas_espacotempo=vortice.coordenadas_espacotempo.copy(),
+            vetor_spin_quantico_informacional=vortice.vetor_spin_quantico_informacional.copy(),
+            densidade_informacional_estruturante=vortice.densidade_informacional_estruturante,
+            dominio_manifestacao=vortice.dominio_manifestacao
+        )
+        vorticess_evolucao.append(novo_vortice)
+
+    universo_atual = UniversoInformacionalUnificado(vorticess=vorticess_evolucao)
+    historico = []
+
+    for t in range(passos_temporais + 1):
+        # Registra métricas atuais
+        metricas = universo_atual.metrica_unificada(
+            raio_correlacao_holografica=raio_correlacao_holografica
+        )
+        metricas["passo_temporal"] = t
+        historico.append(metricas)
+
+        if t == passos_temporais:
+            break
+
+        # Expansão cósmica (Eq. 8.3)
+        fator_escala_atual = 1.0 + parametro_hubble * t
+        fator_escala_proximo = 1.0 + parametro_hubble * (t + 1)
+        fator_expansao = fator_escala_proximo / fator_escala_atual
+
+        # Aplica expansão a vórtices cósmicos/mistos
+        for vortice in universo_atual.vorticess:
+            if vortice.dominio_manifestacao in ("cosmico", "misto"):
+                vortice.coordenadas_espacotempo *= fator_expansao
+
+        # Dinâmica unificada (como na função anterior)
+        epsilon_gradiente = 1e-5
+
+        for vortice in universo_atual.vorticess:
+            if vortice.dominio_manifestacao not in ("cosmico", "misto"):
+                continue
+
+            gradiente = np.zeros(3)
+
+            for dim in range(3):
+                vortice.coordenadas_espacotempo[dim] += epsilon_gradiente
+                U_mais = universo_atual.metrica_unificada(
+                    raio_correlacao_holografica=raio_correlacao_holografica
+                )["Acao_unificada_U"]
+
+                vortice.coordenadas_espacotempo[dim] -= 2 * epsilon_gradiente
+                U_menos = universo_atual.metrica_unificada(
+                    raio_correlacao_holografica=raio_correlacao_holografica
+                )["Acao_unificada_U"]
+
+                vortice.coordenadas_espacotempo[dim] += epsilon_gradiente
+                gradiente[dim] = (U_mais - U_menos) / (2 * epsilon_gradiente)
+
+            ruido = amplitude_ruido * rng.normal(size=3)
+            vortice.coordenadas_espacotempo += taxa_aprendizado * gradiente + ruido
+
+    return universo_atual, historico
+
+# ============================================================================
+# 6. UTILITÁRIOS E ANÁLISE
+# ============================================================================
+
+def distancia_media_cosmica(universo: UniversoInformacionalUnificado) -> float:
+    """Calcula distância média entre vórtices cósmicos/mistos"""
+    vorticess_cosmicos = [
+        v for v in universo.vorticess
+        if v.dominio_manifestacao in ("cosmico", "misto")
+    ]
+
+    if len(vorticess_cosmicos) < 2:
+        return 0.0
+
+    soma_distancias = 0.0
+    contagem = 0
+
+    for i in range(len(vorticess_cosmicos)):
+        for j in range(i + 1, len(vorticess_cosmicos)):
+            soma_distancias += vorticess_cosmicos[i].distancia_espacial_para(
+                vorticess_cosmicos[j]
+            )
+            contagem += 1
+
+    return soma_distancias / contagem if contagem > 0 else 0.0
+
+
+def analisar_estabilidade(
+    universo: UniversoInformacionalUnificado,
+    faixa_Rc: np.ndarray = np.linspace(1.0, 50.0, 20),
+    n_amostras: int = 10,
+    semente: int = 42
+) -> Dict[str, Any]:
+    """
+    Analisa estabilidade do universo para diferentes Rc.
+
+    Testa sensibilidade a perturbações e variação de parâmetros.
+    """
+    rng = np.random.default_rng(semente)
+    resultados = {
+        "valores_Rc": faixa_Rc,
+        "valores_U": [],
+        "valores_ICOER_cosmos": [],
+        "valores_potencial_TGU": [],
+        "normas_gradiente": []
+    }
+
+    for Rc in faixa_Rc:
+        valores_U = []
+        normas_grad = []
+
+        for _ in range(n_amostras):
+            # Aplica pequena perturbação aleatória
+            vorticess_perturbados = []
+            for vortice in universo.vorticess:
+                posicao_perturbada = vortice.coordenadas_espacotempo + \
+                                    0.1 * rng.normal(size=3)
+
+                vortice_perturbado = VorticeSpinInformacional(
+                    identificador=vortice.identificador,
+                    coordenadas_espacotempo=posicao_perturbada,
+                    vetor_spin_quantico_informacional=vortice.vetor_spin_quantico_informacional.copy(),
+                    densidade_informacional_estruturante=vortice.densidade_informacional_estruturante,
+                    dominio_manifestacao=vortice.dominio_manifestacao
+                )
+                vorticess_perturbados.append(vortice_perturbado)
+
+            universo_perturbado = UniversoInformacionalUnificado(
+                vorticess=vorticess_perturbados
+            )
+            metricas = universo_perturbado.metrica_unificada(
+                raio_correlacao_holografica=Rc
+            )
+            valores_U.append(metricas["Acao_unificada_U"])
+
+        # Calcula estatísticas
+        resultados["valores_U"].append(np.mean(valores_U))
+        resultados["valores_ICOER_cosmos"].append(metricas["ICOER_cosmos"])
+        resultados["valores_potencial_TGU"].append(metricas["Potencial_TGU"])
+        resultados["normas_gradiente"].append(np.mean(normas_grad) if normas_grad else 0.0)
+
+    return resultados
+
+# ============================================================================
+# 7. EXPERIMENTO DEMONSTRATIVO
+# ============================================================================
+
+def executar_experimento_demonstrativo():
+    """
+    Executa experimento completo demonstrando todos os aspectos da teoria.
+
+    Este é o ponto de entrada principal para demonstrações.
+    """
+    print("=" * 70)
+    print("EXPERIMENTO: TEORIA UNIFICADA DO SPIN INFORMACIONAL")
+    print("=" * 70)
+    print("Referência: Matuchaki, H. (2025). The Unified Informational Spin Theory")
+    print("Preprints 202502.0514\n")
+
+    # Parâmetros fixos (baseados na teoria)
+    R_C = 10.0  # Raio de correlação holográfica padrão
+
+    # 1. CONSTRUIR UNIVERSOS DE TESTE
+    print("[1/5] CONSTRUINDO UNIVERSOS DE TESTE")
+    print("-" * 40)
+
+    universos = {
+        "Coeso": construir_universo_coeso(semente=2025),
+        "Fragmentado": construir_universo_fragmentado(semente=2026),
+        "Híbrido": construir_universo_hibrido(semente=2027),
+        "Aleatório": construir_universo_toy(semente=2028)
+    }
+
+    # 2. ANÁLISE ESTÁTICA INICIAL
+    print("\n[2/5] ANÁLISE ESTÁTICA INICIAL")
+    print("-" * 40)
+
+    for nome, universo in universos.items():
+        metricas = universo.metrica_unificada(raio_correlacao_holografica=R_C)
+        print(f"{nome:12s} | U = {metricas['Acao_unificada_U']:6.4f} | "
+              f"I_cos = {metricas['ICOER_cosmos']:6.4f} | "
+              f"I_IA = {metricas['ICOER_IA']:6.4f}")
+
+    # 3. DINÂMICA TEMPORAL
+    print("\n[3/5] SIMULAÇÃO DINÂMICA")
+    print("-" * 40)
+
+    universo_base = universos["Híbrido"]
+
+    # Estado inicial
+    metricas_iniciais = universo_base.metrica_unificada(
+        raio_correlacao_holografica=R_C
+    )
+
+    # Simulação
+    universo_final, historico = simular_dinamica_unificada(
+        universo=universo_base,
+        raio_correlacao_holografica=R_C,
+        passos_temporais=20,
+        taxa_aprendizado=0.1,
+        amplitude_ruido=0.05,
+        semente=2029
+    )
+
+    # Estado final
+    metricas_finais = universo_final.metrica_unificada(
+        raio_correlacao_holografica=R_C
+    )
+
+    print(f"Ação inicial U: {metricas_iniciais['Acao_unificada_U']:.4f}")
+    print(f"Ação final U:   {metricas_finais['Acao_unificada_U']:.4f}")
+    print(f"ΔU:            {metricas_finais['Acao_unificada_U'] - metricas_iniciais['Acao_unificada_U']:+.4f}")
+
+    # 4. EXPANSÃO CÓSMICA
+    print("\n[4/5] EXPANSÃO CÓSMICA (H = 0.03)")
+    print("-" * 40)
+
+    dist_inicial = distancia_media_cosmica(universo_base)
+
+    universo_expandido, _ = simular_expansao_cosmica(
+        universo=universo_base,
+        raio_correlacao_holografica=R_C,
+        passos_temporais=15,
+        taxa_aprendizado=0.15,
+        amplitude_ruido=0.03,
+        parametro_hubble=0.03,
+        semente=2030
+    )
+
+    dist_final = distancia_media_cosmica(universo_expandido)
+
+    print(f"Distância média inicial: {dist_inicial:.2f}")
+    print(f"Distância média final:   {dist_final:.2f}")
+    print(f"Fator de expansão:      {dist_final / dist_inicial:.2f}")
+
+    # 5. ANÁLISE DE ESTABILIDADE
+    print("\n[5/5] ANÁLISE DE ESTABILIDADE")
+    print("-" * 40)
+
+    estabilidade = analisar_estabilidade(
+        universo=universo_base,
+        faixa_Rc=np.linspace(1.0, 30.0, 15),
+        n_amostras=5,
+        semente=2031
+    )
+
+    # Encontra Rc ótimo
+    idx_otimo = np.argmax(estabilidade["valores_U"])
+    Rc_otimo = estabilidade["valores_Rc"][idx_otimo]
+    U_maximo = estabilidade["valores_U"][idx_otimo]
+
+    print(f"Rc ótimo: {Rc_otimo:.2f}")
+    print(f"U máximo: {U_maximo:.4f}")
+
+    print("\n" + "=" * 70)
+    print("EXPERIMENTO CONCLUÍDO COM SUCESSO!")
+    print("=" * 70)
+
+    return {
+        "universos": universos,
+        "dinamica": (universo_final, historico),
+        "expansao": universo_expandido,
+        "estabilidade": estabilidade,
+        "Rc_otimo": Rc_otimo
+    }
+
+# ============================================================================
+# 8. PONTO DE ENTRADA PRINCIPAL
+# ============================================================================
+
+if __name__ == "__main__":
+    """
+    Ponto de entrada principal do programa.
+
+    Executa o experimento demonstrativo quando o script é rodado diretamente.
+    """
+    try:
+        resultados = executar_experimento_demonstrativo()
+
+        # Tentativa de visualização (opcional)
+        try:
+            import matplotlib.pyplot as plt
+
+            # Exemplo simples de plot
+            fig, ax = plt.subplots(1, 1, figsize=(10, 6))
+
+            # Plot da estabilidade vs Rc
+            estabilidade = resultados["estabilidade"]
+            ax.plot(estabilidade["valores_Rc"], estabilidade["valores_U"],
+                   'b-o', linewidth=2, markersize=6)
+            ax.axvline(resultados["Rc_otimo"], color='r', linestyle='--',
+                      label=f'Rc ótimo = {resultados["Rc_otimo"]:.2f}')
+            ax.set_xlabel('Raio de Correlação Holográfica (Rc)', fontsize=12)
+            ax.set_ylabel('Ação Unificada (U)', fontsize=12)
+            ax.set_title('Estabilidade do Universo vs Rc', fontsize=14)
+            ax.grid(True, alpha=0.3)
+            ax.legend()
+            ax.set_facecolor('#f8f9fa')
+
+            plt.tight_layout()
+            plt.savefig('estabilidade_universo.png', dpi=150, bbox_inches='tight')
+            print("\nGráfico salvo como 'estabilidade_universo.png'")
+
+        except ImportError:
+            print("\nMatplotlib não está instalado. Instale com: pip install matplotlib")
+
+    except Exception as e:
+        print(f"\nErro durante a execução: {e}")
+        print("Verifique as dependências: numpy é necessário.")
+
+    finally:
+        print("\n" + "=" * 70)
+        print("Implementação da Teoria Unificada do Spin Informacional")
+        print("Baseada em: Matuchaki, H. (2025). The Unified Informational Spin Theory")
+        print("=" * 70)
